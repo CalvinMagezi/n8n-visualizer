@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-primary-bg text-brand-gray antialiased;
+  }
+}
+
+@layer components {
+  .workflow-node {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .neon-text-green {
+    @apply text-brand-green;
+    text-shadow: 0 0 5px theme(colors.brand.green), 0 0 20px theme(colors.brand.green);
+  }
+  
+  .neon-text-blue {
+    @apply text-brand-blue;
+    text-shadow: 0 0 5px theme(colors.brand.blue), 0 0 20px theme(colors.brand.blue);
+  }
+  
+  .neon-border {
+    @apply border-2 border-brand-green;
+    box-shadow: 0 0 5px theme(colors.brand.green), 0 0 20px theme(colors.brand.green);
+  }
+}
