@@ -1,5 +1,5 @@
-import { Header } from '@/components/Header'
-import { WorkflowInput } from '@/components/WorkflowInput'
+import { Header } from '@/components/ui/Header'
+import { WorkflowInput } from '@/components/workflow/WorkflowInput'
 
 export default function Home() {
   return (

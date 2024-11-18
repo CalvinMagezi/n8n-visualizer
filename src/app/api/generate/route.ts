@@ -1,41 +1,45 @@
-import { OpenAI } from 'openai'
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
-import { WorkflowData } from '@/types/workflow'
+import { OpenAI } from "openai";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { WorkflowData } from "@/types/workflow";
 
 if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY is not set in environment variables')
+  throw new Error("OPENAI_API_KEY is not set in environment variables");
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-})
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const promptSchema = z.object({
-  prompt: z.string().min(1)
-})
+  prompt: z.string().min(1),
+});
 
 const workflowSchema = z.object({
   workflow: z.object({
-    nodes: z.array(z.object({
-      id: z.string(),
-      type: z.enum(['trigger', 'action', 'filter', 'loop', 'condition']),
-      label: z.string(),
-      description: z.string().optional(),
-      icon: z.string().optional()
-    })),
-    edges: z.array(z.object({
-      source: z.string(),
-      target: z.string(),
-      label: z.string().optional()
-    }))
-  })
-})
+    nodes: z.array(
+      z.object({
+        id: z.string(),
+        type: z.enum(["trigger", "action", "filter", "loop", "condition"]),
+        label: z.string(),
+        description: z.string().optional(),
+        icon: z.string().optional(),
+      })
+    ),
+    edges: z.array(
+      z.object({
+        source: z.string(),
+        target: z.string(),
+        label: z.string().optional(),
+      })
+    ),
+  }),
+});
 
 export async function POST(req: Request) {
   try {
-    const json = await req.json()
-    const { prompt } = promptSchema.parse(json)
+    const json = await req.json();
+    const { prompt } = promptSchema.parse(json);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -63,49 +67,49 @@ export async function POST(req: Request) {
                 }
               ]
             }
-          }`
+          }`,
         },
         {
           role: "user",
-          content: prompt
-        }
+          content: prompt,
+        },
       ],
       temperature: 0.7,
       max_tokens: 1000,
-      response_format: { type: "json_object" }
-    })
+      response_format: { type: "json_object" },
+    });
 
     try {
-      const result = JSON.parse(completion.choices[0].message.content)
-      const validatedResult = workflowSchema.parse(result)
-      return NextResponse.json(validatedResult)
+      const result = JSON.parse(completion.choices[0].message.content || "");
+      const validatedResult = workflowSchema.parse(result);
+      return NextResponse.json(validatedResult);
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError)
+      console.error("Failed to parse OpenAI response:", parseError);
       return NextResponse.json(
-        { error: 'Invalid response format from AI model' },
+        { error: "Invalid response format from AI model" },
         { status: 500 }
-      )
+      );
     }
   } catch (error) {
-    console.error('Error:', error)
-    
+    console.error("Error:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request format' },
+        { error: "Invalid request format" },
         { status: 400 }
-      )
+      );
     }
-    
+
     if (error instanceof OpenAI.APIError) {
       return NextResponse.json(
-        { error: 'AI service temporarily unavailable' },
+        { error: "AI service temporarily unavailable" },
         { status: 503 }
-      )
+      );
     }
 
     return NextResponse.json(
-      { error: 'Failed to generate workflow' },
+      { error: "Failed to generate workflow" },
       { status: 500 }
-    )
+    );
   }
 }

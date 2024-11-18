@@ -19,8 +19,8 @@ export function CostCalculator({ nodes }: CostCalculatorProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const calculateCosts = (): CostBreakdown => {
-    const baseImplementationCost = 500
-    const baseMonthlyMaintenance = 50
+    const baseImplementationCost = 5
+    const baseMonthlyMaintenance = 2
     
     const costs = nodes.reduce((acc, node) => {
       const complexity = {
